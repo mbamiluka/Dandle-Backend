@@ -1,4 +1,4 @@
-package main.java.com.dandle.authservice.security;
+package com.dandle.authservice.security;
 
 import java.util.Collection;
 import java.util.List;

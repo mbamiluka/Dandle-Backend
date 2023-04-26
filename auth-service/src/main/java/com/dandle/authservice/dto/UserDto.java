@@ -1,4 +1,4 @@
-package main.java.com.dandle.authservice.dto;
+package com.dandle.authservice.dto;
 
 @Data
 @NoArgsConstructor
@@ -9,4 +9,7 @@ public class UserDto {
     private String firstName;
     private String lastName;
     private List<String> roles;
+    public Object getEmail() {
+        return null;
+    }
 }

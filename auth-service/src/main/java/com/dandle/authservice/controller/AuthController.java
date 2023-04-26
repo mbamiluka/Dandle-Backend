@@ -1,5 +1,21 @@
 package main.java.com.dandle.authservice.controller;
 
+import java.util.Collections;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import main.java.com.dandle.authservice.dto.UserDto;
+import main.java.com.dandle.authservice.model.User;
+import main.java.com.dandle.authservice.repository.UserRepository;
+import main.java.com.dandle.authservice.security.JwtTokenUtil;
+import main.java.com.dandle.authservice.service.UserService;
+
 @RestController
 public class AuthController {
 
@@ -17,7 +33,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) {
-        if (userRepository.existsByEmail(userDto.getEmail())) {
+        UserRepository userRepository;
+        if (userRepository.existsByEmail(userDto.getEmail())) { // made chnage
             return ResponseEntity.badRequest().body(new MessageResponseDto("Error: Email is already in use!"));
         }
 

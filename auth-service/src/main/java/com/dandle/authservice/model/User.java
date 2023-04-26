@@ -1,4 +1,20 @@
-package main.java.com.dandle.authservice.model;
+package com.dandle.authservice.model;
+
+import java.io.Serializable;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
@@ -31,7 +47,7 @@ public class User implements Serializable {
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user")
-    private Set<RefreshToken> refreshTokens;
+    private Set<JwtRefreshToken> jwtRefreshTokens;
 
     public User(String email, String password, String firstName, String lastName, Set<Role> roles) {
         this.email = email;

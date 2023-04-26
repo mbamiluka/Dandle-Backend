@@ -1,17 +1,38 @@
-package main.java.com.dandle.authservice.service;
+package com.dandle.authservice.service;
+
+import java.util.Collections;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import com.dandle.authservice.dto.AuthenticationRequestDto;
+import com.dandle.authservice.dto.AuthenticationResponseDto;
+import com.dandle.authservice.dto.UserDto;
+import com.dandle.authservice.model.Role;
+import com.dandle.authservice.model.User;
+import com.dandle.authservice.repository.RoleRepository;
+import com.dandle.authservice.repository.UserRepository;
+import com.dandle.authservice.security.JwtTokenUtil;
+import com.dandle.authservice.security.JwtUserDetailsService;
 
 @Service
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final MyUserDetailsService userDetailsService;
+    private final JwtUserDetailsService jwtUserDetailsService;
     private final JwtTokenUtil jwtTokenUtil;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    //private UserDetailsService userDetailsService;
 
     @Autowired
     public AuthService(AuthenticationManager authenticationManager,
-                       MyUserDetailsService userDetailsService,
+                       JwtUserDetailsService jwtUserDetailsService,
                        JwtTokenUtil jwtTokenUtil,
                        UserRepository userRepository,
                        RoleRepository roleRepository) {

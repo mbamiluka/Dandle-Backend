@@ -1,4 +1,4 @@
-package main.java.com.dandle.authservice.dto;
+package com.dandle.authservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

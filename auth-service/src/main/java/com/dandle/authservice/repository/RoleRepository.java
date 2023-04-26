@@ -1,4 +1,4 @@
-package main.java.com.dandle.authservice.repository;
+package com.dandle.authservice.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

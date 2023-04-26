@@ -1,8 +1,19 @@
-package main.java.com.dandle.authservice.repository;
+package com.dandle.authservice.repository;
+
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.stereotype.Repository;
+
+import com.dandle.authservice.model.User;
+
+import reactor.core.publisher.Mono;
 
 @Repository
 public interface UserRepository extends ReactiveCrudRepository<User, Long> {
-    Mono<User> findByEmail(String email);
+    User findByEmail(String email);
+
+    boolean existsByEmail(Object email);
+
+    void save(User user);
 }
 
 
