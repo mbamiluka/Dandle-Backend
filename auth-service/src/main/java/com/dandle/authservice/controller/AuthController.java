@@ -1,20 +1,30 @@
-package main.java.com.dandle.authservice.controller;
+package com.dandle.authservice.controller;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import main.java.com.dandle.authservice.dto.UserDto;
-import main.java.com.dandle.authservice.model.User;
-import main.java.com.dandle.authservice.repository.UserRepository;
-import main.java.com.dandle.authservice.security.JwtTokenUtil;
-import main.java.com.dandle.authservice.service.UserService;
+import com.dandle.authservice.dto.UserDto;
+import com.dandle.authservice.model.Role;
+import com.dandle.authservice.model.User;
+import com.dandle.authservice.repository.RoleRepository;
+import com.dandle.authservice.repository.UserRepository;
+import com.dandle.authservice.security.JwtTokenUtil;
+import com.dandle.authservice.service.UserService;
 
 @RestController
 public class AuthController {
@@ -40,6 +50,7 @@ public class AuthController {
 
         User user = new User(userDto.getEmail(), encoder.encode(userDto.getPassword()));
         
+        RoleRepository roleRepository;
         // set roles based on user type
         if (userDto.getUserType().equalsIgnoreCase("staff")) {
             Role staffRole = roleRepository.findByName(RoleName.ROLE_STAFF)

@@ -65,4 +65,8 @@ public class JwtTokenUtil {
     private boolean isTokenExpired(String token) {
         return extractExpirationDate(token).before(new Date());
     }
+
+    public String getUsernameFromToken(String authToken) {
+        return null;
+    }
 }
