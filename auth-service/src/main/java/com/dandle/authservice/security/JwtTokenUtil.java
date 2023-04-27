@@ -72,4 +72,8 @@ public class JwtTokenUtil {
 
     public void invalidateToken(String jwtToken) {
     }
+
+    public Boolean validateToken(String jwtToken) {
+        return null;
+    }
 }

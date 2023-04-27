@@ -13,7 +13,7 @@ public interface UserRepository extends ReactiveCrudRepository<User, Long> {
 
     boolean existsByEmail(Object email);
 
-    void save(User user);
+    User save(User user);
 }
 
 

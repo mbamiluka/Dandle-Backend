@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.dandle.authservice.dto.AuthenticationRequestDto;
 import com.dandle.authservice.dto.AuthenticationResponseDto;
 import com.dandle.authservice.dto.UserDto;
+import com.dandle.authservice.exception.BadRequestException;
 import com.dandle.authservice.model.Role;
 import com.dandle.authservice.model.RoleName;
 import com.dandle.authservice.model.User;
@@ -32,16 +33,16 @@ public class AuthService {
     private final JwtTokenUtil jwtTokenUtil;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    //private UserDetailsService userDetailsService;
+    private UserDetailsService userDetailsService;
 
     @Autowired
     public AuthService(AuthenticationManager authenticationManager,
-                       JwtUserDetailsService jwtUserDetailsService,
+                       JwtUserDetailsService userDetailsService,
                        JwtTokenUtil jwtTokenUtil,
                        UserRepository userRepository,
                        RoleRepository roleRepository) {
         this.authenticationManager = authenticationManager;
-        this.jwtUserDetailsService = jwtUserDetailsService;
+        this.jwtUserDetailsService = userDetailsService;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -61,11 +62,14 @@ public class AuthService {
             throw new BadRequestException("Email is already taken");
         }
         User user = new User(userDto.getFirstName(), userDto.getLastName(), userDto.getEmail(), userDto.getPassword());
-        Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+        Role role = roleRepository.findByName(roleName);
+        if (role == null) {
+            throw new RuntimeException("Role not found");
+        }
         user.setRoles(Collections.singleton(role));
         User savedUser = userRepository.save(user);
-        return new UserDto(savedUser.getFirstName(), savedUser.getEmail());
+        return new UserDto(savedUser.getEmail(), savedUser.getPassword(), 
+                savedUser.getFirstName(), null, null);
     }
 
     public Boolean validate(String jwtToken) {
