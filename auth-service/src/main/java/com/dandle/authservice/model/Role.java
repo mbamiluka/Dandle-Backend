@@ -59,4 +59,8 @@ public class Role implements GrantedAuthority {
                 ", authName='" + authName + '\'' +
                 '}';
     }
+
+    public Role orElseThrow(Object object) {
+        return null;
+    }
 }

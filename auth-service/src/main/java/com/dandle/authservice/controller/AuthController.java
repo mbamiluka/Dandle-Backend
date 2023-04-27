@@ -2,6 +2,7 @@ package com.dandle.authservice.controller;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,21 +12,29 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.crypto.keygen.Keys;
 
+import com.dandle.authservice.dto.JwtAuthenticationResponse;
 import com.dandle.authservice.dto.MessageResponseDto;
 import com.dandle.authservice.dto.UserDto;
+import com.dandle.authservice.model.JwtAuthenticationRequest;
 import com.dandle.authservice.model.Role;
+import com.dandle.authservice.model.RoleName;
 import com.dandle.authservice.model.User;
 import com.dandle.authservice.repository.RoleRepository;
 import com.dandle.authservice.repository.UserRepository;
 import com.dandle.authservice.security.JwtTokenUtil;
 import com.dandle.authservice.service.UserService;
+
+import io.jsonwebtoken.Jwts;
 
 @RestController
 public class AuthController {
@@ -42,6 +51,8 @@ public class AuthController {
     @Value("${jwt.secret}")
     private String secretKey;
 
+    private PasswordEncoder encoder;
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) {
         UserRepository userRepository;
@@ -49,7 +60,10 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponseDto("Error: Email is already in use!"));
         }
 
-        User user = new User(userDto.getEmail(), encoder.encode(userDto.getPassword()));
+        Set<Role> roles;
+        User user = new User(userDto.getEmail(), encoder.encode(userDto.getPassword()), userDto.getFirstName(), userDto.getLastName());
+
+
         
         RoleRepository roleRepository;
         // set roles based on user type
@@ -101,7 +115,7 @@ public class AuthController {
     }
 
     private String getUsernameFromToken(String token) {
-        return Jwts.parserBuilder()
+        return Jwts.builder()
                 .setSigningKey(Keys.hmacShaKeyFor(getSecretKey()))
                 .build()
                 .parseClaimsJws(token)

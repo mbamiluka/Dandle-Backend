@@ -11,4 +11,7 @@ import lombok.Setter; import lombok.Getter;
 public class AuthenticationRequestDto {
     private String username;
     private String password;
+    public Object getEmail() {
+        return null;
+    }
 }

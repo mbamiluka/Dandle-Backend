@@ -2,18 +2,22 @@ package com.dandle.authservice.service;
 
 import java.util.Collections;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import com.dandle.authservice.dto.AuthenticationRequestDto;
 import com.dandle.authservice.dto.AuthenticationResponseDto;
 import com.dandle.authservice.dto.UserDto;
 import com.dandle.authservice.model.Role;
+import com.dandle.authservice.model.RoleName;
 import com.dandle.authservice.model.User;
 import com.dandle.authservice.repository.RoleRepository;
 import com.dandle.authservice.repository.UserRepository;
@@ -37,7 +41,7 @@ public class AuthService {
                        UserRepository userRepository,
                        RoleRepository roleRepository) {
         this.authenticationManager = authenticationManager;
-        this.userDetailsService = userDetailsService;
+        this.jwtUserDetailsService = jwtUserDetailsService;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -56,12 +60,12 @@ public class AuthService {
         if (userRepository.existsByEmail(userDto.getEmail())) {
             throw new BadRequestException("Email is already taken");
         }
-        User user = new User(userDto.getName(), userDto.getEmail(), userDto.getPassword());
+        User user = new User(userDto.getFirstName(), userDto.getLastName(), userDto.getEmail(), userDto.getPassword());
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new RuntimeException("Role not found"));
         user.setRoles(Collections.singleton(role));
         User savedUser = userRepository.save(user);
-        return new UserDto(savedUser.getName(), savedUser.getEmail());
+        return new UserDto(savedUser.getFirstName(), savedUser.getEmail());
     }
 
     public Boolean validate(String jwtToken) {

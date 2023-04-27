@@ -69,4 +69,7 @@ public class JwtTokenUtil {
     public String getUsernameFromToken(String authToken) {
         return null;
     }
+
+    public void invalidateToken(String jwtToken) {
+    }
 }
