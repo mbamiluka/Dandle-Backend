@@ -7,10 +7,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 @Component
 public class JwtTokenUtil {
@@ -20,6 +27,10 @@ public class JwtTokenUtil {
 
     @Value("${jwt.expiration}")
     private long expiration;
+
+    private static final String ALGORITHM = "HmacSHA256";
+    private static final int KEY_LENGTH = 256;
+    private static final String SECRET_KEY = "mySecretKey";
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
@@ -75,5 +86,25 @@ public class JwtTokenUtil {
 
     public Boolean validateToken(String jwtToken) {
         return null;
+    }
+
+    public static SecretKey getSecretKey() {
+        try {
+            KeyGenerator keyGen = KeyGenerator.getInstance(ALGORITHM);
+            SecureRandom random = new SecureRandom(SECRET_KEY.getBytes());
+            keyGen.init(KEY_LENGTH, random);
+            return keyGen.generateKey();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error generating secret key", e);
+        }
+    }
+
+    public static String encodeSecretKey(SecretKey secretKey) {
+        return Base64.getEncoder().encodeToString(secretKey.getEncoded());
+    }
+
+    public static SecretKey decodeSecretKey(String encodedKey) {
+        byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+        return new SecretKeySpec(decodedKey, 0, decodedKey.length, ALGORITHM);
     }
 }

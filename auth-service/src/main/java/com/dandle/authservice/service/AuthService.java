@@ -1,6 +1,7 @@
 package com.dandle.authservice.service;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -62,7 +63,7 @@ public class AuthService {
             throw new BadRequestException("Email is already taken");
         }
         User user = new User(userDto.getFirstName(), userDto.getLastName(), userDto.getEmail(), userDto.getPassword());
-        Role role = roleRepository.findByName(roleName);
+        Optional<Role> role = roleRepository.findByName(roleName);
         if (role == null) {
             throw new RuntimeException("Role not found");
         }

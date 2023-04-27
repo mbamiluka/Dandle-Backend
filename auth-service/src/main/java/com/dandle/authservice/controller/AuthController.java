@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.crypto.keygen.Keys;
+import org.springframework.security.crypto.factory.Keys;
 
 import com.dandle.authservice.dto.JwtAuthenticationResponse;
 import com.dandle.authservice.dto.MessageResponseDto;
@@ -53,9 +55,16 @@ public class AuthController {
 
     private PasswordEncoder encoder;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    private RedisTemplate<String, Long> redisTemplate;
+
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) {
-        UserRepository userRepository;
         if (userRepository.existsByEmail(userDto.getEmail())) { // made chnage
             return ResponseEntity.badRequest().body(new MessageResponseDto("Error: Email is already in use!"));
         }
@@ -65,7 +74,6 @@ public class AuthController {
 
 
         
-        RoleRepository roleRepository;
         // set roles based on user type
         if (userDto.getUserType().equalsIgnoreCase("staff")) {
             Role staffRole = roleRepository.findByName(RoleName.ROLE_STAFF)

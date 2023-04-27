@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 
+import com.dandle.authservice.repository.RoleRepository;
+
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Entity
 @Table(name = "roles")
@@ -31,9 +34,16 @@ public class Role implements GrantedAuthority {
     @Nonnull
     private String authName;
 
+    private RoleRepository roleRepository;
+
     @Override
     public String getAuthority() {
         return authName;
+    }
+
+    public Role getRoleByName(RoleName roleName) {
+        return roleRepository.findByName(roleName)
+                .orElseThrow(() -> new RuntimeException("Role not found"));
     }
 
     // equals and hashCode

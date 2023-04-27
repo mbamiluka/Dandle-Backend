@@ -1,6 +1,7 @@
 package com.dandle.authservice.model;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -35,7 +36,7 @@ public class User {
     private String lastName;
 
     @ManyToMany
-    private Set<Role> roles = new HashSet<>();
+    private Set<Optional<Role>> roles = new HashSet<>();
 
     public User() {
     }
@@ -87,12 +88,12 @@ public class User {
         this.lastName = lastName;
     }
 
-    public Set<Role> getRoles() {
+    public Set<Optional<Role>> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void setRoles(Set<Optional<Role>> set) {
+        this.roles = set;
     }
 
 }
