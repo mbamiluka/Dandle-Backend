@@ -1,15 +1,19 @@
 package com.dandle.authservice.controller;
 
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Set;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,7 +26,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.factory.Keys;
 
 import com.dandle.authservice.dto.JwtAuthenticationResponse;
 import com.dandle.authservice.dto.MessageResponseDto;
@@ -36,7 +39,9 @@ import com.dandle.authservice.repository.UserRepository;
 import com.dandle.authservice.security.JwtTokenUtil;
 import com.dandle.authservice.service.UserService;
 
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 @RestController
 public class AuthController {
@@ -62,6 +67,13 @@ public class AuthController {
     private RoleRepository roleRepository;
 
     private RedisTemplate<String, Long> redisTemplate;
+
+    //@Value("${DANDLE_SECRET_KEY}")
+    private static final String SECRET_KEY=System.getenv("DANDLE_SECRET_KEY");
+    private static final int KEY_LENGTH = 256;
+
+    private static final String ALGORITHM = "HmacSHA256 ";
+
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) {
@@ -115,24 +127,37 @@ public class AuthController {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            String username = getUsernameFromToken(token);
+            String username = createToken(token);
             redisTemplate.delete(username);
             return ResponseEntity.ok("User logged out successfully");
         }
         return ResponseEntity.badRequest().body("Authorization header missing or invalid");
     }
 
-    private String getUsernameFromToken(String token) {
-        return Jwts.builder()
-                .setSigningKey(Keys.hmacShaKeyFor(getSecretKey()))
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+    public String createToken(String username) {
+        long EXPIRATION_TIME=99L * 365L * 24L * 60L * 60L * 1000L;;
+        JwtBuilder builder = Jwts.builder()
+                .setSubject(username)
+                .signWith(SignatureAlgorithm.HS256, getSigningKey())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME));
+    
+        return builder.compact();
     }
+    
+    private byte[] getSigningKey() {
+        return SECRET_KEY.getBytes();
+    }
+    
 
-    private byte[] getSecretKey() {
-        return secretKey.getBytes(StandardCharsets.UTF_8);
+    public static SecretKey getSecretKey() {
+        try {
+            KeyGenerator keyGen = KeyGenerator.getInstance(ALGORITHM);
+            SecureRandom random = new SecureRandom(SECRET_KEY.getBytes());
+            keyGen.init(KEY_LENGTH, random);
+            return keyGen.generateKey();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error generating secret key", e);
+        }
     }
 
     @GetMapping("/user")
